@@ -1,37 +1,8 @@
-/* Create a File using Node File System */
-/* require is a module which need to be imported before the function use */
-
-    // const fs = require('fs');
-    // fs.writeFileSync("notes.txt", "File was created by Node.JS")
-
-    // //#region Append the File by Filename. If file is not there, it will create the file.
-    // fs.appendFileSync("notes.txt","\nThe second line was created") 
-    // //#endregion
-
-    /*Getting First Name from Utils
-    const firstName = require('./utils')
-
-    console.log(firstName);
-    */
-
-    /* Importing function from Utils
-    const addition = require('./utils')
-    const sum = addition(1,2)
-    console.log(sum)
-    */
-
 const validator = require('validator') //Used to validate the data to any type
 const notesModule = require('./notes.js')
+const chalk = require('chalk')
 const yargs = require('yargs')
 
-    // const msg = notesModule()
-    // console.log(msg)
-
-    // console.log(validator.isEmail('surenyas1902@gmail.com'))
-
-    // const chalk = require('chalk') //Print the data in different colors and styles
-    // const greenMsg = chalk.red.bold.inverse('Success!')
-    // console.log(greenMsg)
 
 /*
 Use 'nodemon' package from npm modules for continuosly running the file after file changes.
@@ -41,32 +12,76 @@ yargs.version('1.1.0')
 yargs.command({
     command: "add", //Arguments
     describe: "Add a new note",
-    handler: function() {
-        console.log("Adding a new note")
+    builder: { // To configure the parameter like --title types.
+        title: {
+            describe: 'Note Title',
+            demandOption: true, // To make Mandatory or not
+            type: 'string' // Check the type
+        },
+        body: {
+            describe: 'Body of the Note',
+            demandOption: true,
+            type:'string'
+        }
+    },
+    handler(argv) { // What needs to run after giving the command
+        console.log("Adding Notes")
+        notesModule.addNotes(argv.title, argv. body)
     }
 })
 
 yargs.command({
     command:"remove", // Arguments acts as command
     describe:"Remove a note",
-    handler: function() {
-        console.log("Removing a note")
+    builder: {
+        title: {
+            describe: 'Remove a Note',
+            demandOption: true,
+            type: 'string'
+        }
+    },
+    handler(argv) {
+        const title = argv.title
+        if (title === '') {
+            console.log(chalk.white.inverse("Title is empty"))
+            return
+        }
+        notesModule.removeNotes(title)
     }
 })
 
 yargs.command({
     command:"list",
     describe:"List the Notes",
-    handler: function() {
-        console.log("List of notes displayed")
+    handler() {
+        const Notes = notesModule.listNotes()
+        console.log(chalk.underline.bold.green.inverse("Your Notes"))
+        Notes.forEach((note) => {
+            console.log("Title: " + note.title + " & Body: "+ note.body)
+        });
     }
 })
 
 yargs.command({
     command:"read",
     describe:"Read a Note",
-    handler: function() {
-        console.log("Reading the Note")
+    builder: {
+        title: {
+            describe: "Reading the Notes from File",
+            demandOption: true,
+            type: 'string'
+        }
+    },
+    handler(argv) {
+        const title = argv.title
+        const notes = notesModule.readNotes(title);
+        if (notes === undefined) {
+            console.log(chalk.red("No notes found"))
+            return
+        }
+        console.log(chalk.green(notes.title) + ": " + chalk.blue.italic(notes.body))
     }
 })
-console.log(yargs.argv)
+if (yargs.argv._.length === 0) {
+    console.log(chalk.red("app command needs atleast 1 parameters"))
+}
