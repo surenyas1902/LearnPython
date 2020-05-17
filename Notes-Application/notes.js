@@ -3,7 +3,6 @@ const chalk = require('chalk')
 const addNotes = (title,body) => {
     const notes = loadNotes()
     const duplicateNotes = notes.filter((note) => note.title === title)
-
     if (duplicateNotes.length > 0) {
         console.log("Note title taken")
         return;
@@ -31,6 +30,7 @@ const removeNotes = (title) => {
 
 const saveNotes = (notes) => {
     const dataJSON = JSON.stringify(notes)
+    //fs.writeFileSync('notes.json', dataJSON)
     fs.writeFileSync('notes.json', dataJSON)
 }
 
