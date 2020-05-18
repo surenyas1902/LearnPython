@@ -6,8 +6,3 @@ request({url: url, json: true}, (error, response) => {
     const current = response.body.current;
     console.log(current.weather_descriptions[0] + ". It is currently " + current.temperature + " degrees out. It feels like "+ current.feelslike + " degrees out.")
 })
-
-// request(url, {}, (error,response)=> {
-//     const data = JSON.parse(response.body)
-//     console.log(data.current)
-// })
