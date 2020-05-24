@@ -1,32 +1,64 @@
-const request = require("request")
-// const request = require("postman-request")
+const geocode = require('./utils/geocode')
+const forecast = require('./utils/forecast')
 
-const url = "http://api.weatherstack.com/current?access_key=c5f720cf5f8eb1da3a43be7a606b7e03&query=Arakkonam&units=f"
-request({url: url, json: true}, (error, response) => {
-    if (error) {
-        console.log("Unable to connect to weather services.");
-        return;
-    } else if (response.body.success === false) {
-        console.log("Unable to find location")
-        return;
-    }
-    const current = response.body.current;
-    console.log(current.weather_descriptions[0] + ". It is currently " + current.temperature + " degrees out. It feels like "+ current.feelslike + " degrees out.")
-})
+/* With using Yargs - Start */
 
-const coordurl = "https://api.mapbox.com/geocoding/v5/mapbox.places/Arakkonam.json?access_token=pk.eyJ1Ijoic3VyZW55YXMxOTAyIiwiYSI6ImNrYWJ5ZHRreDFiY3Iyc210dnRjbHB3Y2wifQ.kitN6lIZN2RDQv78GFQyaw&limit=1";
-request({url: coordurl, json: true}, (error,response) => {
-    if (error) {
-        console.log("Unable to connect to weather services.");
-        return;
-    }
-    else if (response.body.features.length === 0) {
-        console.log("Unable to find location");
-        return;
-    }
-    const data = response.body;
-    const getCoordinates = data.features[0].center;
-    const lat = getCoordinates[1]
-    const long = getCoordinates[0]
-    console.log("Latitude: " + lat + ", Longitude: " + long)
-})
+    // const yargs = require('yargs')
+
+    // yargs.command({
+    //     command: "location",
+    //     describe: "Enter a location",
+    //     builder: {
+    //         name: {
+    //             describe: "Enter Location Name",
+    //             demandOption: true,
+    //             type:'string'
+    //         }
+    //     },
+    //     handler(argv) {
+            
+    //         const locName = argv.name
+    //         if (locName === '') {
+    //             console.log("Please enter the location name")
+    //             return
+    //         }
+    //         getWeatherService(locName)
+    //     }
+    // })
+
+/* With using Yargs - End */
+const getWeatherService = (locName) => {
+    geocode(locName, (error, data) => {
+        if (error) {
+            console.log(error)
+            return;
+        }
+        const lat = data.latitude;
+        const long = data.longitude;
+        const placename = data.place_name;
+        forecast(lat, long ,(error, data) => {
+            if (error) {
+                console.log(error);
+                return
+            }
+            console.log('The atmosphere in ' + placename + ' is ' + data.description + '. Actual temperature is ' + data.temp +' degrees. But it feels like '+ data.feelslike + ' degrees.')
+        })
+    })
+}
+
+/* With using Without Yargs - Start */
+const args = process.argv;
+if (args.length > 3) {
+    console.log("Please enter the location in double or single quotes if location contains spaces")
+    return;
+}
+const loc = args[2];
+if (loc === undefined || loc === '') {
+    console.log("Please send the location arguments")
+    return;
+}
+getWeatherService(loc);
+/* With using Yargs - End */
+// if (yargs.argv._.length === 0) {
+//     console.log("app command needs atleast 1 parameters")
+// }
