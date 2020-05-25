@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "postman-request": "^2.88.1-postman.22",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "yargs": "^15.3.1"
   }
 }

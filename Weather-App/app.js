@@ -28,20 +28,18 @@ const forecast = require('./utils/forecast')
 
 /* With using Yargs - End */
 const getWeatherService = (locName) => {
-    geocode(locName, (error, data) => {
+    geocode(locName, (error, {latitude: lat, longitude: long, place_name: placename} = {}) => { 
+        //If the service returns the error, then variables will be undefined above. Instead we used default object to rectify the error
         if (error) {
             console.log(error)
             return;
         }
-        const lat = data.latitude;
-        const long = data.longitude;
-        const placename = data.place_name;
-        forecast(lat, long ,(error, data) => {
+        forecast(lat, long ,(error, {description, temp, feelslike} = {}) => {
             if (error) {
                 console.log(error);
                 return
             }
-            console.log('The atmosphere in ' + placename + ' is ' + data.description + '. Actual temperature is ' + data.temp +' degrees. But it feels like '+ data.feelslike + ' degrees.')
+            console.log('The atmosphere in ' + placename + ' is ' + description + '. Actual temperature is ' + temp +' degrees. But it feels like '+ feelslike + ' degrees.')
         })
     })
 }
