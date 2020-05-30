@@ -1,6 +1,8 @@
 const path = require('path')
 const express = require('express')
 const hbs = require('hbs')
+const geocode = require('./utils/geocode')
+const forecast = require('./utils/forecast')
 
 const app = express()
 
@@ -37,9 +39,60 @@ app.get('/help', (req, res) => {
 })
 
 app.get('/weather', (req, res) => {
+    const queryString = req.query;
+    if (!queryString.address) {
+        return res.send({
+            errorMessage: "Address is mandatory"
+        })
+    }
+    geocode(queryString.address, (error, {latitude: lat, longitude: long, place_name: placename} = {}) => { 
+        //If the service returns the error, then variables will be undefined above. Instead we used default object to rectify the error
+        if (error) {
+            return res.send({
+                error
+            })
+        }
+        forecast(lat, long ,(error, {description, temp, feelslike} = {}) => {
+            if (error) {
+                return res.send({
+                    error
+                })
+                return
+            }
+            res.send({
+                forecast: 'The atmosphere in ' + placename + ' is ' + description + '. Actual temperature is ' + temp +' degrees. But it feels like '+ feelslike + ' degrees.',
+                location: queryString.address
+            })
+        })
+    })
+    
+})
+
+app.get('/products', (req, res) => {
+    const queryString = req.query;
+    if (!queryString.search) {
+        return res.send({
+            error: 'You must provide a search term'
+        })
+    }
     res.send({
-        forecast: 'It is raining',
-        location:'Arakkonam'
+        products: []
+    })
+})
+
+app.get('/help/*', (req, res) => {
+    res.render('404', {
+        title: "404",
+        name:"Surendiran S",
+        message: "Help article not found"
+    })
+})
+
+app.get('*', (req,res) => {
+    res.render('404', {
+        title: "404",
+        name: "Surendiran S",
+        message: "404. Page Not found"
     })
 })
 

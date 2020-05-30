@@ -25,8 +25,9 @@ const {label: ProductLabel, rating = 50} = product //If we need to change the va
 
 console.log(ProductLabel, stock, rating) //If the property is unavailable then only the default value takes place.
 
-const transaction = (type, {label, stock, price}) => {
+const transaction = (type, {label = 'No Label', stock = 0, price} = {}) => {
     console.log(label, stock, price)
 };
 
-transaction('order', product)
+transaction('order')
+
