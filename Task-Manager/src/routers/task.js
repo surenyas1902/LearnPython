@@ -48,7 +48,10 @@ router.patch('/tasks/:id', async (req, res) => {
         return res.status(400).send('Bad Request or Invalid Body')
     }
     try {
-        const taskUpdate = await Task.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        const taskUpdate = await Task.findById(req.params.id);
+        updates.forEach((update) => taskUpdate[update] = req.body[update]);
+        await taskUpdate.save();
+        //const taskUpdate = await Task.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
         if (!taskUpdate) {
             res.status(400).send('Data Not found')
         }
