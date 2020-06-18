@@ -12,15 +12,14 @@ app.use(taskRouter)
 
 app.listen(port, () => {
     console.log("Server started on "+port)
-    myFunction()
 })
 
-
+const jwt = require('jsonwebtoken');
 const myFunction = async () => {
-    const password= 'read1234!'
-    const hashPwd = await bcrypt.hash(password, 8)
-    console.log(password, hashPwd)
-    const isValid = await bcrypt.compare(password, hashPwd)
-    console.log(isValid)
+    const token = jwt.sign({_id:'abcd1234'},'thisisthetoken', { expiresIn: '1 hours'})
+    console.log(token);
+    const data = jwt.verify(token, 'thisisthetoken');
+    console.log(data);
 }
 
+myFunction()
