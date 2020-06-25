@@ -1,8 +1,7 @@
-const express = require('express')
+const express = require('express');
 const router = express.Router()
 const auth = require('../middleware/auth');
 const User = require('../models/user');
-const { response } = require('express');
 router.post('/users', async (req, res) => {
     const newUser = new User(req.body);
     try{
@@ -67,7 +66,7 @@ router.get('/users/:id', async (req, res) => {
     }
 })
 
-router.patch('/users/:id', async (req, res) => {
+router.patch('/users/me',auth,  async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'email', 'password', 'age']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -75,13 +74,9 @@ router.patch('/users/:id', async (req, res) => {
         return res.status(400).send({error: "Invalid Update"})
     }
     try {
-        const user = await User.findById(req.params.id);
-        updates.forEach((update) => user[update] = req.body[update]);
-        await user.save();
+        updates.forEach((update) => req.user[update] = req.body[update]);
+        await req.user.save();
         //const user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
-        if (!user) {
-            return res.status(404).send()
-        }
         res.send(user)
     }
     catch(e) {
@@ -89,14 +84,15 @@ router.patch('/users/:id', async (req, res) => {
     }
 })
 
-router.delete('/users/:id', async (req, res) => {
-    const _id = req.params.id;
+router.delete('/users/me', auth, async (req, res) => {
+    const _id = req.user._id;
     try {
-        const user = await User.findByIdAndDelete(_id)
-        if (!user) {
-            return res.status(400).send()
-        }
-        res.send(user)
+        // const user = await User.findByIdAndDelete(_id)
+        // if (!user) {
+        //     return res.status(400).send()
+        // }
+        await req.user.remove()
+        res.send(req.user)
     }
     catch(error) {
         return res.status(500).send(error)
