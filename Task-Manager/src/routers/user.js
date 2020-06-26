@@ -4,15 +4,17 @@ const auth = require('../middleware/auth');
 const User = require('../models/user');
 const multer = require('multer');
 const sharp = require('sharp');
+const { sendWelcomeEmail } = require('../emails/account')
 router.post('/users', async (req, res) => {
     const newUser = new User(req.body);
     try{
         await newUser.save()
+        sendWelcomeEmail(newUser.email, newUser.name)
         const token = await newUser.generateAuthToken()
         res.status(201).send({newUser, token})
     }
     catch(e) {
-        res.status(400).send(e)
+        res.status(400).send(e.message)
     }
 })
 
