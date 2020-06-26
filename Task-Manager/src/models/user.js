@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
+const sharp = require('sharp')
 const Task = require('./task')
 const userSchema = new mongoose.Schema({
     name: {
@@ -46,7 +47,12 @@ const userSchema = new mongoose.Schema({
             type: String,
             required: true
         }
-    }]
+    }],
+    avatar: {
+        type: Buffer
+    }
+},{
+    timestamps: true
 });
 
 userSchema.virtual('tasks', { // Virtual properties. Does not store in the db
@@ -68,6 +74,7 @@ userSchema.methods.toJSON = function() { // Overriding the default function of t
     const userObject = user.toObject();
     delete userObject.password;
     delete userObject.tokens;
+    delete userObject.avatar;
     return userObject;
 }
 
