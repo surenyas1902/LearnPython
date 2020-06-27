@@ -64,7 +64,7 @@ userSchema.virtual('tasks', { // Virtual properties. Does not store in the db
 //Instance Methods
 userSchema.methods.generateAuthToken = async function() {
     const user = this;
-    const token = jwt.sign({_id: user._id.toString()},'thisisthetoken', {expiresIn:'1 hours'})
+    const token = jwt.sign({_id: user._id.toString()},process.env.JWT_SECRET, {expiresIn:'1 hours'})
     user.tokens = user.tokens.concat({token})
     await user.save();
     return token;
