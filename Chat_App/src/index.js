@@ -11,17 +11,19 @@ const port = process.env.PORT || 3000
 const publicPath = path.join(__dirname, '../public')
 
 app.use(express.static(publicPath))
-let count = 0
 
-// server (emit) -> client (receive) -> countupdatedevent
-// client (emit) -> server (receive) -> increment
 io.on('connection', (socket) => {
     console.log('New WebSocket connection')
-    socket.emit('countupdatedevent', count)
-    socket.on('increment', () => {
-        count++;
-        //socket.emit('countupdatedevent', count) -> Socket.emit only emits the data to the particular connection
-        io.emit('countupdatedevent', count) //-> io.emit emits the data to all the connections
+    const message = "Welcome to the Chat App!!";
+    socket.emit('welcomemessage', message ) // Emit only particular current connection
+    socket.broadcast.emit('welcomemessage', 'New user is joined') // Emit to everyone except me.
+    socket.on('sendMessage', (message) => {
+        console.log(message);
+        io.emit('receiveMessage', message) // Emit to everybody
+    })
+
+    socket.on('disconnect', () => { // When a connection disconnected
+        io.emit('welcomemessage', 'User has left')
     })
 })
 
