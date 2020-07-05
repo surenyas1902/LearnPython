@@ -3,7 +3,7 @@ const path = require('path')
 const http = require('http')
 const socketIO = require('socket.io')
 const Filter = require('bad-words')
-const { generateMessage } = require('./utils/messages')
+const { generateMessage, generateLocMessage } = require('./utils/messages')
 
 const app = express()
 const server = http.createServer(app)
@@ -14,24 +14,34 @@ const publicPath = path.join(__dirname, '../public')
 
 app.use(express.static(publicPath))
 
+// socket.emit -> Emits the data only for the particular connection
+// socket.broadcast.emit -> Emits to Everyone except me in all chat rooms
+// io.emit -> Emits to everyone including me in all chat rooms
+// io.to.emit -> Emits to everyone including me in the Particular chatroom
+// socket.broadcast.to.emit -> Emits to everyone except me in the Particular Chatroom
+
+
 io.on('connection', (socket) => {
     console.log('New WebSocket connection')
     const message = "Welcome to the Chat App!!";
 
-    socket.emit('welcomemessage', generateMessage(message)) // Emit only particular current connection
-    socket.broadcast.emit('welcomemessage', generateMessage('New user is joined')) // Emit to everyone except me.
+    socket.on('join', ( {username, room} ) => {
+        socket.join(room)
+        socket.emit('welcomemessage', generateMessage(message))
+        socket.broadcast.to(room).emit('welcomemessage', generateMessage(`${username} has joined`))
+    })
 
     socket.on('sendMessage', (message, callback) => {
         const filter = new Filter()
         if (filter.isProfane(message)) {
             return callback('Profanity is not allowed')
         }
-        io.emit('receiveMessage', generateMessage(message)) // Emit to everybody
+        io.to('Arakkonam').emit('welcomemessage', generateMessage(message)) // Emit to everybody
         callback()
     })
 
     socket.on('sendLocation', ( {lat, long}, callback )=> {
-        socket.broadcast.emit("locationMessage", `https://google.com/maps?q=${lat},${long}`)
+        socket.broadcast.emit("locationMessage", generateLocMessage(`https://google.com/maps?q=${lat},${long}`))
         callback('Location is Shared !!!')
     })
 
