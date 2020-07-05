@@ -3,6 +3,7 @@ const path = require('path')
 const http = require('http')
 const socketIO = require('socket.io')
 const Filter = require('bad-words')
+const { generateMessage } = require('./utils/messages')
 
 const app = express()
 const server = http.createServer(app)
@@ -16,25 +17,26 @@ app.use(express.static(publicPath))
 io.on('connection', (socket) => {
     console.log('New WebSocket connection')
     const message = "Welcome to the Chat App!!";
-    socket.emit('welcomemessage', message ) // Emit only particular current connection
-    socket.broadcast.emit('welcomemessage', 'New user is joined') // Emit to everyone except me.
+
+    socket.emit('welcomemessage', generateMessage(message)) // Emit only particular current connection
+    socket.broadcast.emit('welcomemessage', generateMessage('New user is joined')) // Emit to everyone except me.
 
     socket.on('sendMessage', (message, callback) => {
         const filter = new Filter()
         if (filter.isProfane(message)) {
             return callback('Profanity is not allowed')
         }
-        io.emit('receiveMessage', message) // Emit to everybody
+        io.emit('receiveMessage', generateMessage(message)) // Emit to everybody
         callback()
     })
 
     socket.on('sendLocation', ( {lat, long}, callback )=> {
-        socket.broadcast.emit("welcomemessage", `https://google.com/maps?q=${lat},${long}`)
+        socket.broadcast.emit("locationMessage", `https://google.com/maps?q=${lat},${long}`)
         callback('Location is Shared !!!')
     })
 
     socket.on('disconnect', () => { // When a connection disconnected
-        io.emit('welcomemessage', 'User has left')
+        io.emit('welcomemessage', generateMessage('User has left'))
     })
 })
 

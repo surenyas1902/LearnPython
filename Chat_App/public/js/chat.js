@@ -4,9 +4,26 @@ const $messageForm = document.querySelector("#mainForm")
 const $messageFormInput = $messageForm.querySelector("input")
 const $messageFormButton = $messageForm.querySelector("button")
 const $sendLocationButton = document.querySelector("#sendLocation")
+const $messages = document.querySelector("#messages")
+
+//Templates
+const $messageTemplate = document.querySelector("#message-template").innerHTML;
+const $locationTemplate = document.querySelector("#location-template").innerHTML;
 
 socket.on('welcomemessage', (message) => {
-    console.log(message)
+    console.log(message);
+    const html = Mustache.render($messageTemplate, {
+        message: message.text,
+        createdAt: moment(message.createdAt).format('h:mm a')
+    })
+    $messages.insertAdjacentHTML('beforeend', html)
+})
+
+socket.on('locationMessage', (location) => {
+    const html = Mustache.render($locationTemplate, {
+        url: location
+    })
+    $messages.insertAdjacentHTML('beforeend', html)
 })
 
 document.querySelector("#sendMessage").addEventListener("click", (e) => {
