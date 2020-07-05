@@ -21,7 +21,7 @@ document.querySelector("#sendMessage").addEventListener("click", (e) => {
         if (error) {
             return console.log(error);
         }
-        console.log("Message Delivered")
+        console.log("Message Delivered");
     });
 })
 
